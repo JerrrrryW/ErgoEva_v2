@@ -16,7 +16,10 @@ code {
   --primary-color: #1e1e1e;
   --secondary-color: #323232;
   --background-color: #000000;
-  --text-color: #ffffff;
+  --highlight-color: #555;
+
+  --text-color: #fff;
+  --annotative-text-color: #999;
 
   --font-size-small: 12px;
   --font-size-medium: 16px;

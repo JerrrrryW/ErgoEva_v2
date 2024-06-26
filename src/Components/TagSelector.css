@@ -1,0 +1,74 @@
+/* TagSelector.css */
+.tag-selector {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  padding: 20px;
+  border-radius: 10px;
+  width: 200px;
+}
+
+.tag-category {
+  margin-bottom: 20px;
+}
+
+.category-title {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: var(--annotative-text-color);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag {
+  background-color: var(--secondary-color);
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.tag:hover {
+    background-color: var(--highlight-color);
+}
+
+.dropdown {
+  position: absolute;
+  background-color: var(--secondary-color);
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+.dropdown-item {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: var(--highlight-color);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.action-button {
+  background-color: var(--secondary-color);
+  flex: 1;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid var(--text-color);
+  color: var(--text-color);
+}
+
+.action-button:hover {
+  background-color: var(--highlight-color);
+}

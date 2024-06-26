@@ -27,6 +27,15 @@
   margin-right: 10px;
   height: 40px;
   width: 40px;
+  color: var(--text-color);
+  background-color: var(--secondary-color);
+  border: 1px solid var(--text-color);
+  transition: background-color 0.3s ease;
+}
+
+.toolbar button:hover {
+  background-color: var(--text-color);
+  color: var(--secondary-color);
 }
 
 .sidebar {
@@ -46,7 +55,7 @@
   font-size: 24px;
 }
 
-.property-panel {
+.right-sidebar {
   width: 250px;
   background-color: var(--primary-color);
   padding: 10px;
