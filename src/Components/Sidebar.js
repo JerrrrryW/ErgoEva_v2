@@ -49,7 +49,7 @@ const Sidebar = ({ data }) => {
                             <span>{item.name}</span>
                             {/* <span>{iconMap[item.type]}</span> */}
                         </div>
-                        {expandedItems.includes(item.id) && item.children && renderList(item.children)}
+                        {expandedItems.includes(item.id) && item.children && renderList([item.children])}
                     </li>
                 ))}
             </ul>

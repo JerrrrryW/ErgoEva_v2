@@ -87,7 +87,7 @@ body {
   
   /* 当前选中项 */
   .sidebar li div.active {
-    background-color: #007bff;
-    color: #fff;
+    background-color: var(--selected-color);
+    color: var(tex);
   }
   
