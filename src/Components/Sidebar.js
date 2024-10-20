@@ -16,7 +16,7 @@ const iconMap = {
     'categories': '📑',
     'tags': '🏷️',
     'media-library': '🎥',
-  };
+};
 
 const Sidebar = ({ data }) => {
     const [expandedItems, setExpandedItems] = useState([]);
@@ -35,6 +35,10 @@ const Sidebar = ({ data }) => {
     };
 
     const renderList = (items) => {
+        if (!Array.isArray(items)) {
+            items = Object.values(items); // Convert children object to array
+        }
+
         return (
             <ul>
                 {items.map((item) => (
@@ -47,9 +51,9 @@ const Sidebar = ({ data }) => {
                             className={activeItem === item.id ? 'active' : ''}
                         >
                             <span>{item.name}</span>
-                            {/* <span>{iconMap[item.type]}</span> */}
+                            <span>{iconMap[item.type] || '📁'}</span>
                         </div>
-                        {expandedItems.includes(item.id) && item.children && renderList([item.children])}
+                        {expandedItems.includes(item.id) && item.children && renderList(item.children)}
                     </li>
                 ))}
             </ul>
@@ -62,10 +66,9 @@ const Sidebar = ({ data }) => {
                 <input type="text" placeholder="搜索" />
                 <span>🔍</span>
             </div>
-            {renderList([data])}
+            {renderList(data.children)}
         </div>
     );
 };
-
 
 export default Sidebar;
