@@ -65,7 +65,7 @@ const Canvas = ({ imageUrl, canvasMode }) => {
           // 添加新的标注
           setAnnotations((prevAnnotations) => [
             ...prevAnnotations,
-            { x, y, width, height, label: null },
+            { x, y, width, height, label: '未标注' },
           ]);
           // 显示标注类型选择框
           const canvas = canvasRef.current;
@@ -116,7 +116,21 @@ const Canvas = ({ imageUrl, canvasMode }) => {
     if (canvasMode === 'browse' || canvasMode === 'annotate' || canvasMode === 'subdivision') {
       e.preventDefault();
       const scaleAmount = e.deltaY > 0 ? 0.9 : 1.1;
-      setScale((prevScale) => Math.min(Math.max(prevScale * scaleAmount, 0.1), 5));
+      setScale((prevScale) => {
+        const newScale = Math.min(Math.max(prevScale * scaleAmount, 0.1), 5);
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        const canvas = canvasRef.current;
+        const rect = canvas.getBoundingClientRect();
+        const offsetX = (mouseX - rect.left - position.x) / prevScale;
+        const offsetY = (mouseY - rect.top - position.y) / prevScale;
+
+        setPosition((prevPosition) => ({
+          x: mouseX - rect.left - offsetX * newScale,
+          y: mouseY - rect.top - offsetY * newScale,
+        }));
+        return newScale;
+      });
     }
   };
 
@@ -179,9 +193,7 @@ const Canvas = ({ imageUrl, canvasMode }) => {
             height: annotation.height * scale,
           }}
         >
-          {annotation.label && (
-            <span className="annotation-label">{annotation.label}</span>
-          )}
+          <span className="annotation-label-top">{annotation.label}</span>
         </div>
       ))}
       {/* 显示标注类型选择框 */}
