@@ -44,8 +44,8 @@ const Canvas = ({ imageUrl, canvasMode }) => {
       const canvas = canvasRef.current;
       const rect = canvas.getBoundingClientRect();
       setSelectionStart({
-        x: (e.clientX - rect.left - position.x) / scale,
-        y: (e.clientY - rect.top - position.y) / scale,
+        x: Math.max((e.clientX - rect.left - position.x) / scale, 0),
+        y: Math.max((e.clientY - rect.top - position.y) / scale, 0),
       });
     } else if (canvasMode === 'browse') {
       // 开始拖拽画布
@@ -71,8 +71,8 @@ const Canvas = ({ imageUrl, canvasMode }) => {
           const canvas = canvasRef.current;
           const rect = canvas.getBoundingClientRect();
           setShowTagSelector({
-            x: e.clientX - rect.left, // 调整弹出框的位置，使其相对于canvas父组件左上角
-            y: e.clientY - rect.top,
+            x: Math.min(Math.max(e.clientX - rect.left, 0), rect.width),
+            y: Math.min(Math.max(e.clientY - rect.top, 0), rect.height),
           });
         }
         setSelectionRect(null);
@@ -91,8 +91,8 @@ const Canvas = ({ imageUrl, canvasMode }) => {
       const rect = canvas.getBoundingClientRect();
       const startX = selectionStart.x;
       const startY = selectionStart.y;
-      const currentX = (e.clientX - rect.left - position.x) / scale;
-      const currentY = (e.clientY - rect.top - position.y) / scale;
+      const currentX = Math.min(Math.max((e.clientX - rect.left - position.x) / scale, 0), rect.width / scale);
+      const currentY = Math.min(Math.max((e.clientY - rect.top - position.y) / scale, 0), rect.height / scale);
       setSelectionRect({
         x: Math.min(startX, currentX),
         y: Math.min(startY, currentY),
