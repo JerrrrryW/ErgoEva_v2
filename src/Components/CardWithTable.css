@@ -1,0 +1,87 @@
+/* src/components/CardWithTable.css */
+.card-container {
+  border-radius: 10px;
+  margin: 16px;
+  padding: 8px;
+  color: #fff; /* 将文字颜色改为白色 */
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header .title {
+  display: flex;
+  align-items: center;
+  color: #fff; /* 将标题文字颜色改为白色 */
+}
+
+.card-header .title img {
+  margin-right: 8px;
+}
+
+.card-header .details-link {
+  cursor: pointer;
+  color: #fff; /* 将链接文字颜色改为白色 */
+}
+
+.card-header .details-link:hover {
+  color: #409eff; /* 保持链接悬停颜色 */
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff; /* 将表格文字颜色改为白色 */
+}
+
+.table thead tr {
+  background: #2C2C2C; /* 将表头背景颜色改为深灰色 */
+}
+
+.table thead {
+  border-radius: 6px;
+}
+
+.table th:first-child {
+  border-top-left-radius: 6px; /* 设置左上角的圆角 */
+  border-bottom-left-radius: 6px;
+}
+
+.table th:last-child {
+  border-top-right-radius: 6px; /* 设置右上角的圆角 */
+  border-bottom-right-radius: 6px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 8px;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #1E1E1E; /* 偶数行背景色 */
+}
+
+.table tbody tr:nth-child(odd) {
+  background-color: #2C2C2C; /* 奇数行背景色 */
+}
+
+.table img {
+  margin-right: 8px;
+}
+
+.title img {
+  font-size: 12px;
+  max-height: 2em; /* 限制图标高度不超过当前字体大小的高度 */
+  vertical-align: middle; /* 使图标垂直居中对齐 */
+  margin-right: 8px;
+}
+
+.table img {
+  max-height: 1em; /* 限制图标高度不超过当前字体大小的高度 */
+  vertical-align: middle; /* 使图标垂直居中对齐 */
+  margin-right: 8px;
+}

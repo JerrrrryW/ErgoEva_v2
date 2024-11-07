@@ -7,6 +7,7 @@
 .main {
   display: flex;
   flex: 1;
+  height: calc(100vh - 100px); /* 减去 header 和 toolbar 的高度 */
 }
 
 .header {
@@ -56,9 +57,22 @@
 }
 
 .right-sidebar {
-  width: 250px;
+  min-width: 280px;
   background-color: var(--primary-color);
   padding: 10px;
   color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* 当内容溢出时，出现垂直滚动条 */
 }
 
+.right-sidebar > * {
+  flex-shrink: 0;
+}
+
+.gauge-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}

@@ -2,8 +2,14 @@ import React, { useEffect, useState } from 'react';
 import Canvas from './Components/Canvas';
 import Sidebar from './Components/Sidebar';
 import TagSelector from './Components/TagSelector';
-import './App.css';
 import useUIModel from './data/UIDataModel';
+import CardWithTable from './Components/CardWithTable';
+import GaugeCard from './Components/GaugeCard';
+import DetailView from './Views/DetailView';
+
+
+import './App.css';
+import './Components/PropertyPanel.css';
 
 const Toolbar = ({ setCanvasMode, canvasMode }) => {
   return (
@@ -58,6 +64,24 @@ const PropertyPanel = ({ updateComponent, deleteComponent }) => {
   );
 };
 
+const GaugeDashboard = () => {
+  const data = [
+    { percentage: 75, label: '一致性' },
+    { percentage: 50, label: '可用性' },
+    { percentage: 90, label: '指标三' },
+    { percentage: 65, label: '指标四' },
+  ];
+
+  return (
+    <div className="gauge-dashboard">
+      {data.map((item, index) => (
+        <GaugeCard key={index} percentage={item.percentage} label={item.label} />
+      ))}
+    </div>
+  );
+};
+
+
 const App = () => {
   // 标注模式选择和画布交互控制状态
   const [popupTagSelector, setPopupTagSelector] = useState({
@@ -74,6 +98,19 @@ const App = () => {
     type: 'root',
     children: []
   });
+
+  // 右侧边栏视图状态
+  const [rightSidebarView, setRightSidebarView] = useState('default'); // 'default' 或 'detail'
+  const [selectedDetail, setSelectedDetail] = useState(null); // 存储选中的详情信息
+
+  const handleDetailsClick = (title, icon) => {
+    setSelectedDetail({ title, icon });
+    setRightSidebarView('detail');
+  };
+
+  const handleBackToDefault = () => {
+    setRightSidebarView('default');
+  };
 
   // 加载 JSON 文件中的初始数据
   useEffect(() => {
@@ -100,10 +137,20 @@ const App = () => {
         {uiData && <Sidebar data={uiData} />}
         {/* 画布区域，支持多种交互模式 */}
         <Canvas imageUrl={require('./data/test.png')} canvasMode={canvasMode} />
-        {/* 右侧的工具面板，包含标签选择和属性显示 */}
+        {/* 右侧的工具面板 */}
         <div className='right-sidebar'>
-          <TagSelector />
-          <PropertyPanel updateComponent={updateComponent} deleteComponent={deleteComponent} />
+          {rightSidebarView === 'default' && (
+            <>
+              <GaugeDashboard />
+              <PropertyPanel updateComponent={updateComponent} deleteComponent={deleteComponent} />
+              <CardWithTable onDetailsClick={handleDetailsClick} title='色彩' icon='./icon/color.png' />
+              <CardWithTable onDetailsClick={handleDetailsClick} title='文本' icon='./icon/text.png'/>
+              <CardWithTable onDetailsClick={handleDetailsClick} title='图标' icon='./icon/icon.png'/>
+            </>
+          )}
+          {rightSidebarView === 'detail' && selectedDetail && (
+            <DetailView detail={selectedDetail} onBack={handleBackToDefault} />
+          )}
         </div>
       </div>
     </div>

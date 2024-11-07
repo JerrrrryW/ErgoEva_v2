@@ -1,0 +1,58 @@
+/* src/Components/GaugeCard.css */
+.gauge-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #2C2C2C;
+    padding: 16px;
+    border-radius: 10px;
+    color: #fff;
+    transition: transform 0.3s, box-shadow 0.3s; /* 添加过渡效果 */
+  }
+  
+  .gauge-card:hover {
+    transform: translateY(-5px); /* 悬停时上移 */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
+  }
+  
+  .gauge {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 8px;
+    position: relative; /* 确保内部元素相对定位 */
+  }
+  
+  .gauge svg {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .circle-bg {
+    fill: none;
+    stroke: #555;
+    stroke-width: 3.8;
+  }
+  
+  .circle {
+    fill: none;
+    stroke: #409eff;
+    stroke-width: 3.8;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: center;
+  }
+  
+  .percentage {
+    fill: #fff;
+    font-size: 0.5em;
+    font-weight: bold; /* 加粗字体 */
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  
+  .label {
+    margin-top: 8px;
+    font-size: 1em;
+    text-align: center;
+  }
