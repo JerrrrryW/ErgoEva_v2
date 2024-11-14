@@ -13,10 +13,12 @@ const useUIModel = (initialData) => {
         node.children.forEach((child) => updateTree(child));
       }
     };
-    const newUiData = { ...uiData };
+    // 创建 uiData 的深拷贝
+    const newUiData = JSON.parse(JSON.stringify(uiData));
     updateTree(newUiData);
     setUIData(newUiData);
   };
+
 
   // Update a component by id
   const updateComponent = (componentId, updatedProperties) => {

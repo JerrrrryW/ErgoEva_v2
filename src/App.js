@@ -112,6 +112,36 @@ const App = () => {
     setRightSidebarView('default');
   };
 
+  // 处理新增标注的函数
+  const handleAddAnnotation = (annotation) => {
+    const id = annotation.id; // 使用 Canvas 中生成的 id
+    const newComponent = {
+      id: id,
+      name: annotation.label,
+      type: annotation.label,
+      x: annotation.x,
+      y: annotation.y,
+      width: annotation.width,
+      height: annotation.height,
+      children: [],
+    };
+    // 将新组件添加到 uiData 中，假设根节点的 id 是 '1'
+    addComponent('1', newComponent);
+  };
+
+  // 处理标注更新的函数
+  const handleUpdateAnnotation = (annotation) => {
+    const id = annotation.id;
+    const updatedProperties = {
+      name: annotation.label,
+      type: annotation.label,
+      // 如有其他需要更新的属性，也可在此添加
+    };
+    // 更新 uiDataModel 中对应的组件
+    updateComponent(id, updatedProperties);
+  };
+
+
   // 加载 JSON 文件中的初始数据
   useEffect(() => {
     fetch('/data/sampleLabeledUI.json')
@@ -136,7 +166,12 @@ const App = () => {
         {/* 侧边栏，显示当前标注的层级结构 */}
         {uiData && <Sidebar data={uiData} />}
         {/* 画布区域，支持多种交互模式 */}
-        <Canvas imageUrl={require('./data/test.png')} canvasMode={canvasMode} />
+        <Canvas 
+            imageUrl={require('./data/test.png')} 
+            canvasMode={canvasMode} 
+            onAddAnnotation={handleAddAnnotation}
+            onUpdateAnnotation={handleUpdateAnnotation}
+        />
         {/* 右侧的工具面板 */}
         <div className='right-sidebar'>
           {rightSidebarView === 'default' && (

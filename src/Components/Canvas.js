@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import './Canvas.css';
 import TagSelector from './TagSelector';
 
-const Canvas = ({ imageUrl, canvasMode }) => {
+const Canvas = ({ imageUrl, canvasMode, onAddAnnotation, onUpdateAnnotation }) => {
   const canvasRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false); // 是否正在拖拽画布
   const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 }); // 记录上一次鼠标的位置
@@ -61,30 +61,34 @@ const Canvas = ({ imageUrl, canvasMode }) => {
   };
 
   // 处理鼠标松开事件
+  // 当添加新的标注时，赋予一个唯一的 id
   const handleMouseUp = (e) => {
     if (isSelecting) {
-      // 完成区域选择
       setIsSelecting(false);
       if (selectionRect) {
         const { x, y, width, height } = selectionRect;
         if (width > 0 && height > 0) {
-          // 添加新的标注
-          setAnnotations((prevAnnotations) => [
-            ...prevAnnotations,
-            { x, y, width, height, label: '未标注' },
-          ]);
+          // 创建新的标注，赋予唯一的 id
+          const newAnnotation = {
+            id: Date.now().toString(), // 或使用更可靠的唯一 ID 生成方法
+            x,
+            y,
+            width,
+            height,
+            label: '未标注',
+          };
+          setAnnotations((prevAnnotations) => [...prevAnnotations, newAnnotation]);
           // 显示标注类型选择框
           const canvas = canvasRef.current;
           const rect = canvas.getBoundingClientRect();
           setShowTagSelector({
-            x: Math.min(Math.max(e.clientX - rect.left, 0), rect.width), // 标注选择框的x坐标
-            y: Math.min(Math.max(e.clientY - rect.top, 0), rect.height), // 标注选择框的y坐标
+            x: Math.min(Math.max(e.clientX - rect.left, 0), rect.width),
+            y: Math.min(Math.max(e.clientY - rect.top, 0), rect.height),
           });
         }
         setSelectionRect(null);
       }
     } else if (isDragging) {
-      // 完成画布拖拽
       setIsDragging(false);
     }
   };
@@ -140,26 +144,43 @@ const Canvas = ({ imageUrl, canvasMode }) => {
     }
   };
 
-  // 处理标注类型选择
+  // 修改 handleLabelSelect 函数
   const handleLabelSelect = (label) => {
     setAnnotations((prevAnnotations) => {
       if (editingAnnotation !== null) {
-        // 更新正在编辑的标注
+        // 更新已存在的标注
         const updatedAnnotations = [...prevAnnotations];
-        updatedAnnotations[editingAnnotation] = {
-          ...updatedAnnotations[editingAnnotation],
-          label,
-        };
-        setEditingAnnotation(null); // 结束编辑
+        const annotation = { ...updatedAnnotations[editingAnnotation], label };
+        updatedAnnotations[editingAnnotation] = annotation;
+
+        // 通知上层组件更新 uiDataModel
+        if (onUpdateAnnotation) {
+          onUpdateAnnotation(annotation);
+        }
+
+        setEditingAnnotation(null);
         return updatedAnnotations;
       } else {
         // 更新最后一个标注的标签
-        const lastAnnotation = { ...prevAnnotations[prevAnnotations.length - 1], label };
-        return [...prevAnnotations.slice(0, -1), lastAnnotation];
+        const lastAnnotationIndex = prevAnnotations.length - 1;
+        const lastAnnotation = {
+          ...prevAnnotations[lastAnnotationIndex],
+          label,
+        };
+        const updatedAnnotations = [...prevAnnotations];
+        updatedAnnotations[lastAnnotationIndex] = lastAnnotation;
+
+        // 通知上层组件添加新的标注
+        if (onAddAnnotation) {
+          onAddAnnotation(lastAnnotation);
+        }
+
+        return updatedAnnotations;
       }
     });
-    setShowTagSelector(null); // 隐藏标注选择框
+    setShowTagSelector(null);
   };
+
 
   // 处理取消标注类型选择
   const handleCancelSelect = () => {
@@ -227,7 +248,7 @@ const Canvas = ({ imageUrl, canvasMode }) => {
             height: annotation.height * scale, // 标注矩形的高度
             cursor: canvasMode === 'browse' ? 'pointer' : 'default', // 在浏览模式下显示指针
           }}
-          onClick={() => handleAnnotationClick(index)} // 点击标注矩形时弹出标注选择框
+          // onClick={() => handleAnnotationClick(index)} // 点击标注矩形时弹出标注选择框
           onMouseEnter={() => setHoveredAnnotation(index)} // 鼠标悬浮在标注标签上时
           onMouseLeave={() => setHoveredAnnotation(null)} // 鼠标移出标注标签时
         >
