@@ -17,6 +17,11 @@ const Canvas = ({ imageUrl, canvasMode, onAddAnnotation, onUpdateAnnotation }) =
   const [isHoveringLabel, setIsHoveringLabel] = useState(false); // 是否悬浮在标注标签上
   const [hoveredAnnotation, setHoveredAnnotation] = useState(null); // 当前悬浮的标注
 
+  // 添加一个状态，用于记录放大状态
+  const [isZoomed, setIsZoomed] = useState(false);
+  // 定义一个 ref，用于处理单击和双击事件的区分
+  const clickTimeout = useRef(null);
+
   // 加载图片并初始化画布
   useEffect(() => {
     const image = new Image();
@@ -192,18 +197,86 @@ const Canvas = ({ imageUrl, canvasMode, onAddAnnotation, onUpdateAnnotation }) =
     setShowTagSelector(null); // 隐藏标注选择框
   };
 
-  // 处理标注标签点击事件
-  const handleAnnotationClick = (index) => {
-    setEditingAnnotation(index); // 设置当前正在编辑的标注
+  // 修改 handleAnnotationClick 函数
+  const handleAnnotationClick = (e, index) => {
+    e.stopPropagation();
+    e.preventDefault();
+    // 单击不做任何操作
+  };
+
+  // 添加 handleAnnotationDoubleClick 函数
+  const handleAnnotationDoubleClick = (e, index) => {
+    e.stopPropagation();
+    e.preventDefault();
+    // 执行放大操作
+    zoomToAnnotation(index);
+  };
+
+  // 放大到指定的标注区域
+  const zoomToAnnotation = (index) => {
+    const annotation = annotations[index];
+    if (!annotation) return;
+
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+
+    // 计算新的缩放比例
+    const padding = 50; // 保留 50px 边距
+    const availableWidth = rect.width - padding * 2;
+    const availableHeight = rect.height - padding * 2;
+
+    const scaleX = availableWidth / annotation.width;
+    const scaleY = availableHeight / annotation.height;
+    const newScale = Math.min(scaleX, scaleY);
+
+    // 计算新的位置，使得标注区域居中
+    const newX = -annotation.x * newScale + padding;
+    const newY = -annotation.y * newScale + padding;
+
+    // 更新状态
+    setScale(newScale);
+    setPosition({ x: newX, y: newY });
+    setIsZoomed(true);
+  };
+
+  // 添加一个函数，恢复到初始视图
+  const resetZoom = () => {
+    // 重新初始化图片的位置和缩放比例
+    const image = new Image();
+    image.src = imageUrl;
+    image.onload = () => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const canvasWidth = canvas.offsetWidth;
+        const canvasHeight = canvas.offsetHeight;
+        const imgWidth = image.width;
+        const imgHeight = image.height;
+        const scaleFit = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
+
+        setScale(scaleFit);
+        setPosition({
+          x: (canvasWidth - imgWidth * scaleFit) / 2,
+          y: (canvasHeight - imgHeight * scaleFit) / 2,
+        });
+        setIsZoomed(false);
+      }
+    };
+  };
+
+  // 添加 handleAnnotationLabelClick 函数
+  const handleAnnotationLabelClick = (index) => {
+    setEditingAnnotation(index);
     const annotation = annotations[index];
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     setShowTagSelector({
-      x: annotation.x * scale + position.x, // 标注选择框的x坐标
-      y: annotation.y * scale + position.y, // 标注选择框的y坐标
+      x: annotation.x * scale + position.x,
+      y: annotation.y * scale + position.y,
     });
   };
 
+
+  // 在最外层的 div 添加双击事件，恢复到初始视图
   return (
     <div
       ref={canvasRef}
@@ -212,16 +285,21 @@ const Canvas = ({ imageUrl, canvasMode, onAddAnnotation, onUpdateAnnotation }) =
       onMouseUp={handleMouseUp}
       onMouseMove={handleMouseMove}
       onWheel={handleWheel}
+      onDoubleClick={() => {
+        if (isZoomed) {
+          resetZoom();
+        }
+      }}
     >
       <img
         src={imageUrl}
         alt="Draggable"
         className="canvas-image"
-        draggable="false" // 禁止默认的图片拖拽行为
+        draggable="false"
         style={{
-          transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`, // 根据位置和缩放比例调整图片
+          transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
           transformOrigin: 'top left',
-          cursor: canvasMode === 'browse' ? (isDragging ? 'grabbing' : 'grab') : 'crosshair', // 根据模式设置鼠标光标样式
+          cursor: canvasMode === 'browse' ? (isDragging ? 'grabbing' : 'grab') : 'crosshair',
         }}
       />
       {/* 绘制选择矩形 */}
@@ -229,10 +307,10 @@ const Canvas = ({ imageUrl, canvasMode, onAddAnnotation, onUpdateAnnotation }) =
         <div
           className="selection-rect"
           style={{
-            left: selectionRect.x * scale + position.x, // 选择矩形的x坐标
-            top: selectionRect.y * scale + position.y, // 选择矩形的y坐标
-            width: selectionRect.width * scale, // 选择矩形的宽度
-            height: selectionRect.height * scale, // 选择矩形的高度
+            left: selectionRect.x * scale + position.x,
+            top: selectionRect.y * scale + position.y,
+            width: selectionRect.width * scale,
+            height: selectionRect.height * scale,
           }}
         ></div>
       )}
@@ -240,19 +318,22 @@ const Canvas = ({ imageUrl, canvasMode, onAddAnnotation, onUpdateAnnotation }) =
       {annotations.map((annotation, index) => (
         <div
           key={index}
-          className={`annotation-rect ${hoveredAnnotation === index ? 'hovered' : ''}`} // 如果悬浮则添加hovered类
+          className={`annotation-rect ${hoveredAnnotation === index ? 'hovered' : ''}`}
           style={{
-            left: annotation.x * scale + position.x, // 标注矩形的x坐标
-            top: annotation.y * scale + position.y, // 标注矩形的y坐标
-            width: annotation.width * scale, // 标注矩形的宽度
-            height: annotation.height * scale, // 标注矩形的高度
-            cursor: canvasMode === 'browse' ? 'pointer' : 'default', // 在浏览模式下显示指针
+            left: annotation.x * scale + position.x,
+            top: annotation.y * scale + position.y,
+            width: annotation.width * scale,
+            height: annotation.height * scale,
+            cursor: canvasMode === 'browse' ? 'pointer' : 'default',
           }}
-          // onClick={() => handleAnnotationClick(index)} // 点击标注矩形时弹出标注选择框
-          onMouseEnter={() => setHoveredAnnotation(index)} // 鼠标悬浮在标注标签上时
-          onMouseLeave={() => setHoveredAnnotation(null)} // 鼠标移出标注标签时
+          onClick={(e) => handleAnnotationClick(e, index)}
+          onDoubleClick={(e) => handleAnnotationDoubleClick(e, index)}
+          onMouseEnter={() => setHoveredAnnotation(index)}
+          onMouseLeave={() => setHoveredAnnotation(null)}
         >
-          <span className="annotation-label-top" onClick={() => handleAnnotationClick(index)}>{annotation.label}</span> {/* 点击标注标签时弹出标注类型选择框 */}
+          <span className="annotation-label-top" onClick={() => handleAnnotationLabelClick(index)}>
+            {annotation.label}
+          </span>
         </div>
       ))}
       {/* 显示标注类型选择框 */}
@@ -260,14 +341,16 @@ const Canvas = ({ imageUrl, canvasMode, onAddAnnotation, onUpdateAnnotation }) =
         <div
           style={{
             position: 'absolute',
-            left: showTagSelector.x, // 标注选择框的x坐标
-            top: showTagSelector.y, // 标注选择框的y坐标
+            left: showTagSelector.x,
+            top: showTagSelector.y,
             zIndex: 1000,
-            transform: 'scale(0.8)', // 缩小选择框的大小
+            transform: 'scale(0.8)',
           }}
         >
           <TagSelector
-            initialHighlight={editingAnnotation !== null ? annotations[editingAnnotation].label : null} // 初始化高亮的标签
+            initialHighlight={
+              editingAnnotation !== null ? annotations[editingAnnotation].label : null
+            }
             onTagSelect={handleLabelSelect}
             onCancel={handleCancelSelect}
           />
